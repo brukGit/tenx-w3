@@ -1,13 +1,20 @@
 # scripts/run_analysis.py
 import os
+import sys
 import pandas as pd
-from src.data_loader import DataLoader
-from src.eda import EDA
-from src.statistical_analysis import StatisticalAnalysis
+
+# Add the src directory to the Python path
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, src_dir)
+
+from data_loader import DataLoader
+from eda import EDA
+from statistical_analysis import StatisticalAnalysis
+from advanced_visualizations import AdvancedVisualizations
 
 def main():
     # Load data
-    data_loader = DataLoader('path/to/your/data.csv')
+    data_loader = DataLoader('../resources/Data/machineLearning.txt')
     data = data_loader.load_data()
 
     # Perform EDA
@@ -30,6 +37,10 @@ def main():
 
     correlation = stats_analysis.calculate_correlation('TotalPremium', 'TotalClaims')
     print(f"Correlation between TotalPremium and TotalClaims: {correlation}")
+
+    # Generate advanced plots
+    gap = AdvancedVisualizations(data)
+    gap.generate_advanced_plots('../resources/Data/machineLearning.txt', 'output', '../notebooks/sa_shapefile.shp')
 
 if __name__ == "__main__":
     main()

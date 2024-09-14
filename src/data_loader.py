@@ -14,7 +14,7 @@ class DataLoader:
         Returns:
             pd.DataFrame: Loaded data
         """
-        self.data = pd.read_csv(self.file_path)
+        self.data = pd.read_csv(self.file_path, sep='|')
         return self.data
 
     def get_summary_statistics(self) -> Dict[str, Any]:

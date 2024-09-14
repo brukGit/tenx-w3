@@ -1,4 +1,6 @@
 resources/
 venv/
 all.py
+scripts/output/
+deliverables/
 
