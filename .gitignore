@@ -1,1 +1,4 @@
 resources/
+deliverables/
+venv/
+scripts/output
