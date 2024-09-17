@@ -2,7 +2,8 @@
 /venv/
 /scripts/output/
 /deliverables/
-# resources/
+resources/
 # /.dvc/
 /data/
 
+/machineLearning.txt
