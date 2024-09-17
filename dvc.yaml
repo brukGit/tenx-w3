@@ -1,0 +1,7 @@
+stages:
+  preprocess:
+    cmd: python src/preprocess.py data/machineLearning.txt data/processed_data.csv
+    deps:
+      - data/machineLearning.txt
+    outs:
+      - data/processed_data.csv

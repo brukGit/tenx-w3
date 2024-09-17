@@ -1,6 +1,10 @@
 
-venv/
-all.py
-scripts/output/
-deliverables/
+/venv/
+/scripts/output/
+/deliverables/
+resources/
+# /.dvc/
+# /data/
 
+# /machineLearning.txt
+.dvc/cache
