@@ -3,6 +3,6 @@
 /scripts/output/
 /deliverables/
 # resources/
-/.dvc/
+# /.dvc/
 /data/
 
