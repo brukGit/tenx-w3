@@ -1,6 +1,9 @@
 
 venv/
-all.py
 scripts/output/
 deliverables/
+resources/
+.dvc/
+data/
+
 
