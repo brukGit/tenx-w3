@@ -4,7 +4,7 @@
 /deliverables/
 resources/
 # /.dvc/
-# /data/
+data/machineLearning.txt
 
-# /machineLearning.txt
+/machineLearning.txt
 .dvc/cache
