@@ -1,9 +1,9 @@
 
-venv/
-scripts/output/
-deliverables/
-resources/
-.dvc/
-data/
+/venv/
+/scripts/output/
+/deliverables/
+/resources/
+/.dvc/
+/data/
 
 
