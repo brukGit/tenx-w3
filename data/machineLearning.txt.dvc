@@ -1,7 +1,3 @@
-
-outs:
-- md5: f6b7009b68ae21372b7deca9307fbb23
-  size: 529363713
-  hash: md5
-  path: machineLearning.txt
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:8da3b9f8d03cf3054a81b19b4d78ee970931601843e282581d28b459bfe9e649
+size 106
