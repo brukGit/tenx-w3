@@ -1,108 +1,79 @@
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-import shap
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class StatisticalModeling:
-    def __init__(self, data):
-        self.data = data
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-        self.models = {}
-        self.preprocessor = None
+    def __init__(self, df):
+        self.df = df
 
-    def prepare_data(self, target='TotalPremium'):
-        # Handle missing data
-        # print(f"Data shape before dropna: {self.data.shape}")
-        # self.data = self.data.dropna()
-        # print(f"Data shape after dropna: {self.data.shape}")
-        
+    def handle_missing_data(self):
+        self.df = self.df.dropna(subset=['TotalPremium', 'TotalClaims'])
+        return self.df.fillna(0)  # Impute missing values with 0
 
-        # Feature engineering
-        self.data['VehicleAge'] = pd.to_datetime('today').year - self.data['RegistrationYear']
-        self.data['IsNewVehicle'] = (self.data['VehicleAge'] <= 1).astype(int)
+    def feature_engineering(self):
+        self.df['TotalPremium/Claims_Ratio'] = self.df['TotalPremium'] / (self.df['TotalClaims'] + 1)
+        return self.df
 
-        # Split features and target
-        X = self.data.drop([target, 'TotalClaims'], axis=1)
-        y = self.data[target]
+    def encode_categorical_data(self):
+        self.handle_datetime_columns()
+        categorical_columns = self.df.select_dtypes(include=['object', 'category']).columns
+        label_encoder = LabelEncoder()
+        for col in categorical_columns:
+            self.df[col] = self.df[col].astype(str)
+            self.df[col] = label_encoder.fit_transform(self.df[col])
+        return self.df
 
-        # Train-test split
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    def handle_datetime_columns(self):
+        datetime_columns = self.df.select_dtypes(include=['datetime64']).columns
+        for col in datetime_columns:
+            self.df[col + '_year'] = self.df[col].dt.year
+            self.df[col + '_month'] = self.df[col].dt.month
+            self.df[col + '_day'] = self.df[col].dt.day
+            self.df[col + '_timestamp'] = self.df[col].astype(int) / 10**9
+        self.df = self.df.drop(datetime_columns, axis=1)
+        return self.df
 
-        # Identify numeric and categorical columns
-        numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
-        categorical_features = X.select_dtypes(include=['object']).columns
+    def select_important_features(self, target_column):
+        correlation_matrix = self.df.corr()
+        important_features = correlation_matrix[target_column].abs().sort_values(ascending=False).index
+        return important_features[:10]  # Select top 10 features including the target
 
-        # Create preprocessor
-        numeric_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='median')),
-            ('scaler', StandardScaler())
-        ])
+    def scale_features(self, X_train, X_test):
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+        return X_train_scaled, X_test_scaled
 
-        categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-            ('onehot', OneHotEncoder(handle_unknown='ignore'))
-        ])
+    def train_test_split(self, target_column):
+        features = self.select_important_features(target_column)
+        X = self.df[features].drop([target_column], axis=1)
+        y = self.df[target_column]
+        return train_test_split(X, y, test_size=0.2, random_state=42)
 
-        self.preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', numeric_transformer, numeric_features),
-                ('cat', categorical_transformer, categorical_features)
-            ])
+    def train_model(self, model, X_train, X_test, y_train, y_test):
+        # Scale features
+        X_train_scaled, X_test_scaled = self.scale_features(X_train, X_test)
+        model.fit(X_train_scaled, y_train)
+        predictions = model.predict(X_test_scaled)
+        mse = mean_squared_error(y_test, predictions)
+        r2 = r2_score(y_test, predictions)
+        return predictions, mse, r2
 
-    def build_models(self):
-        # Linear Regression
-        lr_model = Pipeline([
-            ('preprocessor', self.preprocessor),
-            ('regressor', LinearRegression())
-        ])
-        lr_model.fit(self.X_train, self.y_train)
-        self.models['Linear Regression'] = lr_model
+    def linear_regression(self, X_train, X_test, y_train, y_test):
+        model = LinearRegression()
+        return self.train_model(model, X_train, X_test, y_train, y_test)
 
-        # Random Forest
-        rf_model = Pipeline([
-            ('preprocessor', self.preprocessor),
-            ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
-        ])
-        rf_model.fit(self.X_train, self.y_train)
-        self.models['Random Forest'] = rf_model
+    def random_forest(self, X_train, X_test, y_train, y_test):
+        model = RandomForestRegressor(n_estimators=100)
+        return self.train_model(model, X_train, X_test, y_train, y_test)
 
-        # XGBoost
-        xgb_model = Pipeline([
-            ('preprocessor', self.preprocessor),
-            ('regressor', XGBRegressor(n_estimators=100, random_state=42))
-        ])
-        xgb_model.fit(self.X_train, self.y_train)
-        self.models['XGBoost'] = xgb_model
-
-    def evaluate_models(self):
-        results = {}
-        for name, model in self.models.items():
-            y_pred = model.predict(self.X_test)
-            mse = mean_squared_error(self.y_test, y_pred)
-            r2 = r2_score(self.y_test, y_pred)
-            results[name] = {'MSE': mse, 'R2': r2}
-        return results
-
-    def feature_importance(self, model_name='Random Forest'):
-        model = self.models[model_name]
-        feature_names = self.preprocessor.get_feature_names_out()
-        importances = model.named_steps['regressor'].feature_importances_
-        return pd.Series(importances, index=feature_names).sort_values(ascending=False)
-
-    def shap_analysis(self, model_name='XGBoost'):
-        model = self.models[model_name]
-        X_processed = self.preprocessor.transform(self.X_test)
-        explainer = shap.TreeExplainer(model.named_steps['regressor'])
-        shap_values = explainer.shap_values(X_processed)
-        return shap_values, self.preprocessor.get_feature_names_out()
+    def xgboost(self, X_train, X_test, y_train, y_test):
+        model = XGBRegressor()
+        return self.train_model(model, X_train, X_test, y_train, y_test)
