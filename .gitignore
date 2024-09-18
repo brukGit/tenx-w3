@@ -3,8 +3,8 @@
 /scripts/output/
 /deliverables/
 resources/
-# /.dvc/
-# /data/
-
-# /machineLearning.txt
+data/machineLearning.txt
+/machineLearning.txt
 .dvc/cache
+allfiles.txt
+
