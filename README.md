@@ -32,10 +32,14 @@ project/
 │   ├── data_loader.py
 │   ├── eda.py
 │   └── statistical_analysis.py
+│   └── hypothesis_testing.py
+│   └── statistical_modeling.py
 ├── notebooks/
 │   ├── __init__.py
 │   ├── README.md
 │   └── exploratory_analysis.ipynb
+│   └── hypothesis_testing.ipynb
+│   └── statistical_modeling.ipynb
 ├── tests/
 │   ├── __init__.py
 │   ├── test_data_loader.py
@@ -96,6 +100,8 @@ The dataset includes information about insurance policies, transactions, client 
 1. **Data Loading and Preprocessing**: Handled by `src/data_loader.py`
 2. **Exploratory Data Analysis**: Implemented in `src/eda.py` and demonstrated in the Jupyter notebook
 3. **Statistical Analysis**: Provided by `src/statistical_analysis.py`
+4. **Hypothesis Testing**: Provided by `src/hypothesis_testing.py`
+5. **Statistical Modeling**: Provided by `src/statistical_modeling.py`
 
 ## Running Tests
 
