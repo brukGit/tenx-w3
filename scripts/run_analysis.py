@@ -11,6 +11,7 @@ from data_loader import DataLoader
 from eda import EDA
 from statistical_analysis import StatisticalAnalysis
 from advanced_visualizations import AdvancedVisualizations
+from hypothesis_testing import HypothesisTesting
 
 def main():
     # Load data
@@ -41,6 +42,16 @@ def main():
     # Generate advanced plots
     gap = AdvancedVisualizations(data)
     gap.generate_advanced_plots('../resources/Data/machineLearning.txt', 'output', '../notebooks/sa_shapefile.shp')
+
+
+    # Perform hypothesis testing
+    ht = HypothesisTesting(data)
+    ht_results = ht.run_all_tests()
+    for result in ht_results:
+        print(f"Test: {result['test']}")
+        print(f"Statistic: {result['statistic']:.4f}")
+        print(f"P-value: {result['p_value']:.4f}")
+        print(f"Reject null hypothesis: {result['reject_null']}\n")
 
 if __name__ == "__main__":
     main()
